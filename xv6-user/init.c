@@ -29,7 +29,7 @@ main(void)
       exit(1);
     }
     if(pid == 0){
-      exec("getpid", argv);                  //原本的 exec("shell",argv)  #拉起一个用户的进程
+      exec("write", argv);                  //原本的 exec("shell",argv)  #拉起一个用户的进程
       printf("init: exec sh failed\n");
       exit(1);
     }

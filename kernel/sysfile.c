@@ -334,7 +334,7 @@ sys_getcwd(void)
 {
   uint64 addr;
   if (argaddr(0, &addr) < 0)
-    return 0;
+    return -1;
 
   struct dirent *de = myproc()->cwd;
   char path[FAT32_MAX_PATH];
@@ -343,6 +343,9 @@ sys_getcwd(void)
 
   if (de->parent == NULL) {
     s = "/";
+    if (copyout2(addr, s, strlen(s) + 1) < 0)
+      return -1;
+    return addr;
   } else {
     s = path + FAT32_MAX_PATH - 1;
     *s = '\0';
@@ -350,14 +353,14 @@ sys_getcwd(void)
       len = strlen(de->filename);
       s -= len;
       if (s <= path)          // can't reach root "/"
-        return 0;
+        return -1;
       strncpy(s, de->filename, len);
       *--s = '/';
       de = de->parent;
     }
 
     if(copyout2(addr,s,strlen(s) + 1) < 0)
-      return 0;
+      return -1;
 
     return addr;
   }

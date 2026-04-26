@@ -11,7 +11,7 @@
 	.string	"init: fork failed\n"
 	.align	3
 .LC2:
-	.string	"getpid"
+	.string	"write"
 	.align	3
 .LC3:
 	.string	"init: exec sh failed\n"

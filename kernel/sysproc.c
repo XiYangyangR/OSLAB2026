@@ -162,29 +162,55 @@ uint64
 sys_times(void)
 {
   uint64 addr;
-  if (argaddr(0, &addr) < 0) {
+  if (argaddr(0, &addr) < 0)
     return -1;
-  }
-  struct tms{
+
+  struct tms {
     uint64 tms_utime;
     uint64 tms_stime;
     uint64 tms_cutime;
     uint64 tms_cstime;
-  }ktms;
+  } ktms;
 
   uint64 ticks_now;
   acquire(&tickslock);
-  ticks_now=ticks;
+  ticks_now = ticks;
   release(&tickslock);
 
-  ktms.tms_utime=ticks_now;
-  ktms.tms_stime=ticks_now;
-  ktms.tms_cutime=0;
-  ktms.tms_cstime=0;
+  ktms.tms_utime = ticks_now;
+  ktms.tms_stime = ticks_now;
+  ktms.tms_cutime = 0;
+  ktms.tms_cstime = 0;
 
-  if(copyout2(addr, (char*)&ktms,sizeof(ktms))<0){
+  if (copyout2(addr, (char*)&ktms, sizeof(ktms)) < 0)
     return -1;
-  }
 
   return ticks_now;
+}
+
+uint64
+sys_uname(void)
+{
+  uint64 addr;
+  if (argaddr(0, &addr) < 0)
+    return -1;
+
+  struct utsname {
+    char sysname[65];
+    char nodename[65];
+    char release[65];
+    char version[65];
+    char machine[65];
+  } kuts;
+
+  safestrcpy(kuts.sysname, "xv6-k210", sizeof(kuts.sysname));
+  safestrcpy(kuts.nodename, "oslab", sizeof(kuts.nodename));
+  safestrcpy(kuts.release, "0.1", sizeof(kuts.release));
+  safestrcpy(kuts.version, "2024", sizeof(kuts.version));
+  safestrcpy(kuts.machine, "riscv64", sizeof(kuts.machine));
+
+  if (copyout2(addr, (char*)&kuts, sizeof(kuts)) < 0)
+    return -1;
+
+  return 0;
 }
