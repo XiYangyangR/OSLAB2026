@@ -18,7 +18,7 @@
 #define SYS_uptime      14
 #define SYS_open        15
 #define SYS_write       64
-#define SYS_remove      17
+#define SYS_remove      199
 #define SYS_trace       18
 #define SYS_sysinfo     19
 #define SYS_mkdir       20
@@ -26,8 +26,10 @@
 #define SYS_test_proc   22
 #define SYS_dev         23
 #define SYS_readdir     24
-#define SYS_getcwd      25
+#define SYS_getcwd      17
 #define SYS_rename      26
+#define SYS_times       153
+#define SYS_uname       160
 #define SYS_shutdown    10001
 
 #endif

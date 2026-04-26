@@ -10,8 +10,11 @@
 #include "include/kalloc.h"
 #include "include/string.h"
 #include "include/printf.h"
+#include "include/vm.h"
 
 extern int exec(char *path, char **argv);
+extern uint ticks;
+
 
 uint64
 sys_exec(void)
@@ -153,4 +156,35 @@ sys_trace(void)
   }
   myproc()->tmask = mask;
   return 0;
+}
+
+uint64
+sys_times(void)
+{
+  uint64 addr;
+  if (argaddr(0, &addr) < 0) {
+    return -1;
+  }
+  struct tms{
+    uint64 tms_utime;
+    uint64 tms_stime;
+    uint64 tms_cutime;
+    uint64 tms_cstime;
+  }ktms;
+
+  uint64 ticks_now;
+  acquire(&tickslock);
+  ticks_now=ticks;
+  release(&tickslock);
+
+  ktms.tms_utime=ticks_now;
+  ktms.tms_stime=ticks_now;
+  ktms.tms_cutime=0;
+  ktms.tms_cstime=0;
+
+  if(copyout2(addr, (char*)&ktms,sizeof(ktms))<0){
+    return -1;
+  }
+
+  return ticks_now;
 }

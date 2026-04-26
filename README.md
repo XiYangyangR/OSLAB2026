@@ -1,92 +1,122 @@
-# RjyOSLab
-
-
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+# XV6-RISCV On K210
+Run xv6-riscv on k210 board  
+[English](./README.md) | [中文](./README_cn.md)   
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.eduxiji.net/pku2200014129/rjyoslab.git
-git branch -M main
-git push -uf origin main
+ (`-')           (`-')                   <-.(`-')                            
+ (OO )_.->      _(OO )                    __( OO)                            
+ (_| \_)--.,--.(_/,-.\  ,--.    (`-')    '-'. ,--.  .----.   .--.   .----.   
+ \  `.'  / \   \ / (_/ /  .'    ( OO).-> |  .'   / \_,-.  | /_  |  /  ..  \  
+  \    .')  \   /   / .  / -.  (,------. |      /)    .' .'  |  | |  /  \  . 
+  .'    \  _ \     /_)'  .-. \  `------' |  .   '   .'  /_   |  | '  \  /  ' 
+ /  .'.  \ \-'\   /   \  `-' /           |  |\   \ |      |  |  |  \  `'  /  
+`--'   '--'    `-'     `----'            `--' '--' `------'  `--'   `---''   
 ```
 
-## Integrate with your tools
+![run-k210](./img/xv6-k210_run.gif)  
 
-- [ ] [Set up project integrations](https://gitlab.eduxiji.net/pku2200014129/rjyoslab/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Dependencies
++ `k210 board` or `qemu-system-riscv64`
++ RISC-V Toolchain: [riscv-gnu-toolchain](https://github.com/riscv/riscv-gnu-toolchain.git)
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```bash
+git clone https://github.com/HUST-OS/xv6-k210
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Run on k210 board
+First you need to connect your k210 board to your PC.  
+And check the `USB serial port` (In my situation it will be `ttyUSB0`):  
+```bash
+ls /dev/ | grep USB
+```
+Build the kernel and user program:
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```bash
+cd xv6-k210
+make build
+```
+Instead of the original file system, xv6-k210 runs with FAT32. You might need an SD card with FAT32 format.  
+Your SD card should NOT keep a partition table. To start `shell` and other user programs, you need to copy them into your SD card.  
+First, connect and mount your SD card (SD card reader required).
+```bash
+ls /dev/ # To check your SD device
+mount <your SD device name> <mount point>
+make sdcard dst="SD card mount point"
+umount <mount point>
+```
+Then, insert the SD card to your k210 board and run:
+```bash
+make run
+```
+Sometimes you should change the `USB serial port`:  
+```bash
+make run k210-serialport=`Your-USB-port`(default by ttyUSB0)
+```
+Ps: Most of the k210-port in Linux is ttyUSB0, if you use Windows or Mac OS, this doc 
+may help you: [maixpy-doc](https://maixpy.sipeed.com/zh/get_started/env_install_driver.html#)  
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## Run on qemu-system-riscv64
+First, make sure `qemu-system-riscv64` is installed on your system.  
+Second, make a disk image file with FAT32 file system.
+```bash
+make fs
+```
+It will generate a disk image file `fs.img`, and compile some user programs like `shell` then copy them into the `fs.img`.  
+As long as the `fs.img` exists, you don't need to do this every time before running, unless you want to update it.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Finally, start running.
+```bash
+make run platform=qemu
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Ps: Press Ctrl + A then X to quit qemu.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## About shell
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+The shell commands are user programs, too. Those program should be put in a "/bin" directory in your SD card or the `fs.img`.  
+Now we support a few useful commands, such as `cd`, `ls`, `cat` and so on.
 
-## License
-For open source projects, say how it is licensed.
+In addition, `shell` supports some shortcut keys as below:
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- Ctrl-H -- backspace  
+- Ctrl-U -- kill a line  
+- Ctrl-D -- end of file (EOF)  
+- Ctrl-P -- print process list  
+
+## Add my programs on xv6-k210
+1. Make a new C source file in `xv6-user/` like `myprog.c`, and put your codes;
+2. You can include `user.h` to use the functions declared in it, such as `open`, `gets` and `printf`;
+3. Add a line "`$U/_myprog\`" in `Makefile` as below:
+    ```Makefile
+    UPROGS=\
+        $U/_init\
+        $U/_sh\
+        $U/_cat\
+        ...
+        $U/_myprog\      # Don't ignore the leading '_'
+    ```
+4. Then make:
+    ```bash
+    make userprogs
+    ```
+    Now you might see `_myprog` in `xv6-user/` if no error detected. Finally you need to copy it into your SD (see [here](#run-on-k210-board))
+     or FS image (see [here](#run-on-qemu-system-riscv64)).
+
+## Progress
+- [x] Multicore boot
+- [x] Bare-metal printf
+- [x] Memory alloc
+- [x] Page Table
+- [x] Timer interrupt
+- [x] S mode extern interrupt
+- [x] Receive uarths message
+- [x] SD card driver
+- [x] Process management
+- [x] File system
+- [x] User program
+- [X] Steady keyboard input(k210)
+
+## TODO
+Fix the bugs of U-mode exception on k210.
+
