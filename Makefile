@@ -252,14 +252,13 @@ clean:
 	$U/usys.S \
 	$(UPROGS)
 
-kernal-qemu:$T/kernal
+kernel-qemu: $T/kernel
 	cp $< kernel-qemu
-sbi-qemu:$(RUSTSBI)
+
+sbi-qemu: $(RUSTSBI)
 	cp $< sbi-qemu
 
-
-all:
-	build kernel-qemu sbi-qemu
+all: build kernel-qemu sbi-qemu
 
 dump_initcode: all
 	$(CC) -Os -ffreestanding -fno-common -nostdlib -mno-relax -I. -Ikernel -S $U/init.c -o $U/init.S
