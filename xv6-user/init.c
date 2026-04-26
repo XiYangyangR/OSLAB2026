@@ -7,6 +7,7 @@
 #include "xv6-user/user.h"          //用户态的头文件，包含了用户态的系统调用接口 exec, fork, wait, exit 等函数的声明
 
 char *argv[] = { "sh", 0 };
+char *test[]={"getcwd", "write", "getpid", "times", "uname",0};
 
 int
 main(void)
@@ -21,16 +22,17 @@ main(void)
   dup(0);  // stdout
   dup(0);  // stderr
 
-  for(int i=0;i<1;i++){
+  for(int i=0;test[i];i++){
     printf("init: starting sh\n");
     pid = fork();
     if(pid < 0){
-      printf("init: fork failed\n");
-      exit(1);
+      printf("init: fork %s failed\n",test[i]);
+      continue;
     }
     if(pid == 0){
-      exec("write", argv);                  //原本的 exec("shell",argv)  #拉起一个用户的进程
-      printf("init: exec sh failed\n");
+      char *argv[]={ test[i],0};
+      exec(test[i], argv);                  //原本的 exec("shell",argv)  #拉起一个用户的进程
+      printf("init: exec %s failed\n", test[i]);
       exit(1);
     }
 
