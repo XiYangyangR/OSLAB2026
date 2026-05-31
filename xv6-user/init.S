@@ -139,15 +139,24 @@ main:
 	.align	3
 .LC18:
 	.string	"exit"
-	.globl	argv
 	.align	3
 .LC19:
+	.string	"brk"
+	.align	3
+.LC20:
+	.string	"mmap"
+	.align	3
+.LC21:
+	.string	"munmap"
+	.globl	argv
+	.align	3
+.LC22:
 	.string	"sh"
 	.section	.data.rel.local,"aw"
 	.align	3
 	.set	.LANCHOR0,. + 0
 	.type	test, @object
-	.size	test, 128
+	.size	test, 152
 test:
 	.dword	.LC4
 	.dword	.LC5
@@ -164,11 +173,14 @@ test:
 	.dword	.LC16
 	.dword	.LC17
 	.dword	.LC18
+	.dword	.LC19
+	.dword	.LC20
+	.dword	.LC21
 	.dword	0
 	.type	argv, @object
 	.size	argv, 16
 argv:
-	.dword	.LC19
+	.dword	.LC22
 	.dword	0
 	.ident	"GCC: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0"
 	.section	.note.GNU-stack,"",@progbits

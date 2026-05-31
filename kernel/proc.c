@@ -164,6 +164,10 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
+  for(int i=0;i<NVMA;i++){
+    p->vmas[i].valid= 0;
+  }
+  p->mmap_next =0x60000000;
   return p;
 }
 

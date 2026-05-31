@@ -502,3 +502,112 @@ fail:
     eput(src);
   return -1;
 }
+
+extern void *kalloc(void);
+extern void kfree(void *);
+extern int mappages(pagetable_t, uint64, uint64, uint64, int);
+extern void vmunmap(pagetable_t, uint64, uint64, int);
+
+// 内存映射 (syscall 222)
+uint64
+sys_mmap(void)
+{
+  uint64 addr;
+  int length, prot, flags, fd, offset;
+  struct file *f;
+
+  if(argaddr(0, &addr) < 0 || argint(1, &length) < 0 || argint(2, &prot) < 0 ||
+     argint(3, &flags) < 0 || argfd(4, &fd, &f) < 0 || argint(5, &offset) < 0)
+    return -1;
+
+  struct proc *p = myproc();
+  struct vma *v = 0;
+  
+  for(int i = 0; i < NVMA; i++){
+    if(p->vmas[i].valid == 0){
+      v = &p->vmas[i];
+      break;
+    }
+  }
+  if(!v) return -1;
+
+  uint64 start_addr = PGROUNDDOWN(p->mmap_next);
+  p->mmap_next = start_addr + PGROUNDUP(length);
+
+  v->valid = 1;
+  v->addr = start_addr;
+  v->length = length;
+  v->prot = prot;
+  v->flags = flags;
+  v->f = f;
+  v->offset = offset;
+  
+  filedup(f);
+
+  for(uint64 a = 0; a < length; a += PGSIZE){
+    void *pa = kalloc();
+    if(pa == 0) return -1;
+    memset(pa, 0, PGSIZE);
+    
+    int pte_flags = PTE_U | PTE_V;
+    if(prot & 1) pte_flags |= PTE_R;
+    if(prot & 2) pte_flags |= PTE_W;
+    if(prot & 4) pte_flags |= PTE_X;
+
+    if(mappages(p->pagetable, start_addr + a, PGSIZE, (uint64)pa, pte_flags) != 0){
+      kfree(pa);
+      return -1;
+    }
+
+    // 直接使用最底层的 eread 读入物理页！
+    // 避开fileread / copyout 对 p->sz 的限制
+    int read_len = PGSIZE;
+    if (a + PGSIZE > length) read_len = length - a;
+    
+    // 参数 0 表示这是一个内核地址 (pa)，不需要通过用户页表做检查
+    eread(f->ep, 0, (uint64)pa, offset + a, read_len);
+  }
+
+  return start_addr;
+}
+
+// 解除映射 (syscall 215)
+uint64
+sys_munmap(void)
+{
+  uint64 addr;
+  int length;
+  if(argaddr(0, &addr) < 0 || argint(1, &length) < 0)
+    return -1;
+
+  struct proc *p = myproc();
+  struct vma *v = 0;
+  
+  for(int i = 0; i < NVMA; i++){
+    if(p->vmas[i].valid && addr == p->vmas[i].addr){
+      v = &p->vmas[i];
+      break;
+    }
+  }
+  if(!v) return -1;
+
+  // 直接把物理页的数据通过 ewrite 写回文件
+  if((v->flags & 1) && (v->prot & 2)){
+    for(uint64 a = 0; a < length; a += PGSIZE){
+      // 通过页表反查虚拟地址对应的物理页地址
+      uint64 pa = walkaddr(p->pagetable, addr + a);
+      if(pa != 0) {
+        int write_len = PGSIZE;
+        if(a + PGSIZE > length) write_len = length - a;
+        // 参数 0 表示 source 是内核地址，避开 copyin 限制
+        ewrite(v->f->ep, 0, pa, v->offset + a, write_len);
+      }
+    }
+  }
+
+  vmunmap(p->pagetable, addr, PGROUNDUP(length)/PGSIZE, 1);
+  v->valid = 0;
+  fileclose(v->f); 
+
+  return 0;
+}

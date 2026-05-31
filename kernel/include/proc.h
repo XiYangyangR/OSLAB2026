@@ -1,5 +1,6 @@
 #ifndef __PROC_H
 #define __PROC_H
+#define NVMA 16
 
 #include "param.h"
 #include "riscv.h"
@@ -8,6 +9,17 @@
 #include "file.h"
 #include "fat32.h"
 #include "trap.h"
+
+struct vma {
+  int valid;
+  uint64 addr;      // 映射的起始虚拟地址
+  int length;       // 映射长度
+  int prot;         // 读写权限 (PROT_READ, PROT_WRITE等)
+  int flags;        // 标志位 (MAP_SHARED, MAP_PRIVATE)
+  struct file *f;   // 映射的文件指针
+  int offset;       // 文件偏移量
+};
+
 
 // Saved registers for kernel context switches.
 struct context {
@@ -64,6 +76,8 @@ struct proc {
   struct dirent *cwd;          // Current directory
   char name[16];               // Process name (debugging)
   int tmask;                    // trace mask
+  struct vma vmas[NVMA];        // Virtual memory areas
+  uint64 mmap_next;             // Next available address for mmap
 };
 
 void            reg_info(void);

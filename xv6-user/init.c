@@ -7,7 +7,7 @@
 #include "xv6-user/user.h"          //用户态的头文件，包含了用户态的系统调用接口 exec, fork, wait, exit 等函数的声明
 
 char *argv[] = { "sh", 0 };
-char *test[]={"getcwd", "write", "getpid", "times", "uname","getppid","yield","gettimeofday","sleep","fork","clone","wait","waitpid","execve","exit",0};
+char *test[]={"getcwd", "write", "getpid", "times", "uname","getppid","yield","gettimeofday","sleep","fork","clone","wait","waitpid","execve","exit","brk","mmap","munmap",0};
 
 int
 main(void)

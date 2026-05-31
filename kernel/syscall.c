@@ -13,6 +13,100 @@
 #include "include/printf.h"
 #include "include/sbi.h"
 #include "include/sysnum.h"
+#include "include/stat.h"
+#include "include/fcntl.h"
+
+struct kstat {
+    uint64 st_dev;
+    uint64 st_ino;
+    uint32 st_mode;
+    uint32 st_nlink;
+    uint32 st_uid;
+    uint32 st_gid;
+    uint64 st_rdev;
+    uint64 __pad;
+    uint64 st_size;    
+    uint32 st_blksize; 
+    uint32 __pad2;     
+    uint64 st_blocks;
+    uint64 st_atime_sec;
+    uint64 st_atime_nsec;
+    uint64 st_mtime_sec;
+    uint64 st_mtime_nsec;
+    uint64 st_ctime_sec;
+    uint64 st_ctime_nsec;
+    uint32 __unused[2];
+};
+
+extern uint64 sys_open(void);
+extern uint64 sys_fstat(void);
+
+// Linux 标志位 (八进制)
+#define LINUX_O_CREAT  0100
+#define LINUX_O_TRUNC  01000
+#define LINUX_O_APPEND 02000
+
+// 包装 openat：增加标志位翻译
+uint64 sys_openat(void) {
+    struct proc *p = myproc();
+    uint64 old_a0 = p->trapframe->a0;
+    uint64 old_a1 = p->trapframe->a1;
+    uint64 old_a2 = p->trapframe->a2;
+    
+    // 1. 获取 Linux 的 flags
+    int linux_flags = p->trapframe->a2;
+    // 2. 基础读写权限(0, 1, 2)在两边是一样的
+    int xv6_flags = linux_flags & 0x3; 
+    
+    // 3. 核心翻译过程！把 Linux 的标志位翻译成 xv6 (fcntl.h) 的标志位
+    if (linux_flags & LINUX_O_CREAT)  xv6_flags |= O_CREATE; 
+    if (linux_flags & LINUX_O_TRUNC)  xv6_flags |= O_TRUNC;  
+    if (linux_flags & LINUX_O_APPEND) xv6_flags |= O_APPEND; 
+
+    // 4. 交给 xv6 原生 sys_open
+    p->trapframe->a0 = p->trapframe->a1; // path
+    p->trapframe->a1 = xv6_flags;        // 翻译后的 flags
+    
+    uint64 ret = sys_open();
+    
+    // 恢复现场
+    p->trapframe->a0 = old_a0;
+    p->trapframe->a1 = old_a1;
+    p->trapframe->a2 = old_a2;
+    
+    return ret;
+}
+
+// 包装 fstat：增加文件类型翻译
+uint64 sys_fstat_linux(void) {
+    struct proc *p = myproc();
+    uint64 addr = p->trapframe->a1; 
+    
+    if(sys_fstat() < 0) return -1;
+    
+    struct stat xv6_st;
+    if(copyin2((char*)&xv6_st, addr, sizeof(xv6_st)) < 0) return -1;
+    
+    struct kstat kst;
+    memset(&kst, 0, sizeof(kst));
+    kst.st_dev = xv6_st.dev;
+    kst.st_ino = 0;             
+    
+    // 核心翻译：把 xv6 的 T_DIR/T_FILE 翻译为 Linux 的标准类型掩码
+    if (xv6_st.type == T_DIR) {
+        kst.st_mode = 0040000 | 0777; // S_IFDIR
+    } else {
+        kst.st_mode = 0100000 | 0777; // S_IFREG (常规文件)
+    }
+    
+    kst.st_nlink = 1;           
+    kst.st_size = xv6_st.size;
+    
+    if(copyout2(addr, (char*)&kst, sizeof(kst)) < 0) return -1;
+    
+    return 0;
+}
+
 
 // Fetch the uint64 at addr from the current process.
 int
@@ -129,7 +223,10 @@ extern uint64 sys_gettimeofday(void);
 extern uint64 sys_nanosleep(void);
 extern uint64 sys_clone(void);
 extern uint64 sys_wait4(void);
-
+extern uint64 sys_brk(void);
+extern uint64 sys_mmap(void);
+extern uint64 sys_munmap(void);
+extern uint64 sys_openat(void);
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
   [SYS_exit]        sys_exit,
@@ -167,6 +264,12 @@ static uint64 (*syscalls[])(void) = {
   [SYS_execve]      sys_exec,
   [SYS_nanosleep]   sys_nanosleep,
   [SYS_gettimeofday] sys_gettimeofday,
+  [SYS_brk]        sys_brk,
+  [SYS_mmap]       sys_mmap,
+  [SYS_munmap]     sys_munmap,
+  [SYS_openat]     sys_openat,
+  [SYS_fstat_linux] sys_fstat_linux,
+  [SYS_close_linux] sys_close,
 };
 
 static char *sysnames[] = {
@@ -206,6 +309,12 @@ static char *sysnames[] = {
   [SYS_wait4]       "wait4",
   [SYS_nanosleep]   "nanosleep",
   [SYS_gettimeofday] "gettimeofday",
+  [SYS_brk]        "brk",
+  [SYS_mmap]       "mmap",
+  [SYS_munmap]     "munmap",
+  [SYS_openat]     "openat",
+  [SYS_fstat_linux] "fstat_linux",
+  [SYS_close_linux] "close_linux",
 };
 
 void

@@ -331,3 +331,36 @@ sys_wait4(void)
     return -1;
   return wait4(pid, status);
 }
+
+uint64
+sys_brk(void)
+{
+  uint64 addr;
+  if(argaddr(0, &addr) < 0)
+    return -1;
+
+  struct proc *p = myproc();
+  uint64 old_sz = p->sz; // 当前的堆顶位置
+
+  // 1. 如果传入 0，直接返回当前堆顶 (测试用例常用的探测方式)
+  if (addr == 0) {
+    return old_sz;
+  }
+
+  // 2. 如果新地址 > 老地址，说明要扩大堆
+  if (addr > old_sz) {
+    // 调用 xv6 底层扩展内存的函数，参数是增加的字节数
+    if (growproc(addr - old_sz) < 0) {
+      return old_sz; // Linux 语义：失败时返回旧边界，不返回 -1
+    }
+  } 
+  // 3. 如果新地址 < 老地址，说明要收缩堆（释放内存）
+  else if (addr < old_sz) {
+    // growproc 传负数就是收缩内存
+    if (growproc(addr - old_sz) < 0) {
+      return old_sz;
+    }
+  }
+
+  return p->sz; // 返回新的堆顶地址
+}
