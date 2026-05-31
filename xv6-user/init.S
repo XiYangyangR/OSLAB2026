@@ -109,26 +109,66 @@ main:
 	.align	3
 .LC8:
 	.string	"uname"
-	.globl	argv
 	.align	3
 .LC9:
+	.string	"getppid"
+	.align	3
+.LC10:
+	.string	"yield"
+	.align	3
+.LC11:
+	.string	"gettimeofday"
+	.align	3
+.LC12:
+	.string	"sleep"
+	.align	3
+.LC13:
+	.string	"fork"
+	.align	3
+.LC14:
+	.string	"clone"
+	.align	3
+.LC15:
+	.string	"wait"
+	.align	3
+.LC16:
+	.string	"waitpid"
+	.align	3
+.LC17:
+	.string	"execve"
+	.align	3
+.LC18:
+	.string	"exit"
+	.globl	argv
+	.align	3
+.LC19:
 	.string	"sh"
 	.section	.data.rel.local,"aw"
 	.align	3
 	.set	.LANCHOR0,. + 0
 	.type	test, @object
-	.size	test, 48
+	.size	test, 128
 test:
 	.dword	.LC4
 	.dword	.LC5
 	.dword	.LC6
 	.dword	.LC7
 	.dword	.LC8
+	.dword	.LC9
+	.dword	.LC10
+	.dword	.LC11
+	.dword	.LC12
+	.dword	.LC13
+	.dword	.LC14
+	.dword	.LC15
+	.dword	.LC16
+	.dword	.LC17
+	.dword	.LC18
 	.dword	0
 	.type	argv, @object
 	.size	argv, 16
 argv:
-	.dword	.LC9
+	.dword	.LC19
 	.dword	0
 	.ident	"GCC: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0"
 	.section	.note.GNU-stack,"",@progbits

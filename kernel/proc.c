@@ -381,6 +381,58 @@ fork(void)
   return pid;
 }
 
+int
+clone(uint64 stack)
+{
+  int i, pid;
+  struct proc *np;
+  struct proc *p = myproc();
+
+  // Allocate process.
+  if((np = allocproc()) == NULL){
+    return -1;
+  }
+
+  // Copy user memory from parent to child.
+  if(uvmcopy(p->pagetable, np->pagetable, np->kpagetable, p->sz) < 0){
+    freeproc(np);
+    release(&np->lock);
+    return -1;
+  }
+  np->sz = p->sz;
+
+  np->parent = p;
+
+  // copy tracing mask from parent.
+  np->tmask = p->tmask;
+
+  // copy saved user registers.
+  *(np->trapframe) = *(p->trapframe);
+
+  // Cause fork to return 0 in the child.
+  np->trapframe->a0 = 0;
+
+  if(stack != 0) {
+    np->trapframe->sp = stack;
+  }
+
+  // increment reference counts on open file descriptors.
+  for(i = 0; i < NOFILE; i++)
+    if(p->ofile[i])
+      np->ofile[i] = filedup(p->ofile[i]);
+  np->cwd = edup(p->cwd);
+
+  safestrcpy(np->name, p->name, sizeof(p->name));
+
+  pid = np->pid;
+
+  np->state = RUNNABLE;
+
+  release(&np->lock);
+
+  return pid;
+}
+
 // Pass p's abandoned children to init.
 // Caller must hold p->lock.
 void
@@ -523,6 +575,64 @@ wait(uint64 addr)
     sleep(p, &p->lock);  //DOC: wait-sleep
   }
 }
+
+int
+wait4(int target_pid, uint64 addr)
+{
+  struct proc *np;
+  int havekids, pid;
+  struct proc *p = myproc();
+
+  // hold p->lock for the whole time to avoid lost
+  // wakeups from a child's exit().
+  acquire(&p->lock);
+
+  for(;;){
+    // Scan through table looking for exited children.
+    havekids = 0;
+    for(np = proc; np < &proc[NPROC]; np++){
+      // this code uses np->parent without holding np->lock.
+      // acquiring the lock first would cause a deadlock,
+      // since np might be an ancestor, and we already hold p->lock.
+      if(np->parent == p){
+        // np->parent can't change between the check and the acquire()
+        // because only the parent changes it, and we're the parent.
+        acquire(&np->lock);
+        havekids = 1;
+        if(target_pid>0 && np->pid != target_pid) {
+          continue;
+        }
+        if(np->state == ZOMBIE){
+          // Found one.
+          pid = np->pid;
+          if(addr != 0) {
+            int xstate=np->xstate<<8;
+            if(copyout2(addr, (char *)&xstate, sizeof(xstate)) < 0) {
+              freeproc(np);
+              release(&np->lock);
+              return -1;
+            }
+          }
+          freeproc(np);
+          release(&np->lock);
+          release(&p->lock);
+          return pid;
+        }
+        release(&np->lock);
+      }
+    }
+
+    // No point waiting if we don't have any children.
+    if(!havekids || p->killed){
+      release(&p->lock);
+      return -1;
+    }
+    
+    // Wait for a child to exit.
+    sleep(p, &p->lock);  //DOC: wait-sleep
+  }
+}
+
 
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
