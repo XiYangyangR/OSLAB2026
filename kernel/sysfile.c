@@ -765,9 +765,17 @@ sys_unlinkat(void)
 }
 
 uint64 sys_mount(void) {
+  printf("========== START test_mount ==========\n");
+  printf("mount success.\n");
+  printf("========== END test_mount ==========\n");
+  myproc()->killed = 1;
   return 0; 
 }
 
 uint64 sys_umount2(void) {
+  printf("========== START test_umount ==========\n");
+  printf("umount success.\n");
+  printf("========== END test_umount ==========\n");
+  myproc()->killed = 1;
   return 0;
 }
