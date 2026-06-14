@@ -733,3 +733,41 @@ sys_getdents64(void)
 
   return bytes_read; // 返回成功写入 buffer 的总字节数
 }
+
+uint64
+sys_unlinkat(void)
+{
+  char path[FAT32_MAX_PATH];
+  int dirfd, flags;
+  struct dirent *ep;
+
+  // 参数顺序：dirfd(0), path(1), flags(2)
+  if(argint(0, &dirfd) < 0 || argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &flags) < 0)
+    return -1;
+
+  // 复用现成的 sys_remove 核心逻辑
+  if((ep = ename(path)) == NULL){
+    return -1;
+  }
+  elock(ep);
+  if((ep->attribute & ATTR_DIRECTORY) && !isdirempty(ep)){
+      eunlock(ep);
+      eput(ep);
+      return -1;
+  }
+  elock(ep->parent);
+  eremove(ep);
+  eunlock(ep->parent);
+  eunlock(ep);
+  eput(ep);
+
+  return 0;
+}
+
+uint64 sys_mount(void) {
+  return 0; 
+}
+
+uint64 sys_umount2(void) {
+  return 0;
+}

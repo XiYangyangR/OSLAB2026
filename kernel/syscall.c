@@ -233,6 +233,10 @@ extern uint64 sys_dev(void);
 extern uint64 sys_readdir(void);
 extern uint64 sys_mkdirat(void);
 extern uint64 sys_getdents64(void);
+extern uint64 sys_unlinkat(void);
+extern uint64 sys_mount(void);
+extern uint64 sys_umount2(void);
+
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
   [SYS_exit]        sys_exit,
@@ -284,6 +288,10 @@ static uint64 (*syscalls[])(void) = {
   [SYS_mkdirat]     sys_mkdirat,
   [SYS_chdir_linux] sys_chdir,
   [SYS_getdents64]  sys_getdents64,
+  [SYS_unlinkat]    sys_unlinkat,
+  [SYS_mount]       sys_mount,
+  [SYS_umount2]     sys_umount2,
+  [SYS_pipe2]       sys_pipe,
 };
 
 static char *sysnames[] = {
@@ -337,6 +345,10 @@ static char *sysnames[] = {
   [SYS_mkdirat]     "mkdirat",
   [SYS_chdir_linux] "chdir",
   [SYS_getdents64]  "getdents64",
+  [SYS_unlinkat]    "unlinkat",
+  [SYS_mount]       "mount",
+  [SYS_umount2]     "umount2",
+  [SYS_pipe2]       "pipe2",
 };
 
 void
