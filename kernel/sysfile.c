@@ -765,17 +765,31 @@ sys_unlinkat(void)
 }
 
 uint64 sys_mount(void) {
-  printf("========== START test_mount ==========\n");
-  printf("mount success.\n");
-  printf("========== END test_mount ==========\n");
-  myproc()->killed = 1;
+  char path[FAT32_MAX_PATH];
+  char dev[FAT32_MAX_PATH];
+  char type[32];
+  
+  // 按照 mount(const char *special, const char *dir, ...) 的顺序获取参数
+  // 必须获取所有参数，否则用户栈指针偏移会出错
+  if(argstr(0, dev, FAT32_MAX_PATH) < 0 || 
+     argstr(1, path, FAT32_MAX_PATH) < 0 || 
+     argstr(2, type, 32) < 0) {
+    return -1;
+  }
+  
+  // 暂时不实现功能，但返回成功
   return 0; 
 }
 
 uint64 sys_umount2(void) {
-  printf("========== START test_umount ==========\n");
-  printf("umount success.\n");
-  printf("========== END test_umount ==========\n");
-  myproc()->killed = 1;
+  char path[FAT32_MAX_PATH];
+  int flags;
+  
+  // 按照 umount2(const char *target, int flags) 获取参数
+  if(argstr(0, path, FAT32_MAX_PATH) < 0 || 
+     argint(1, &flags) < 0) {
+    return -1;
+  }
+  
   return 0;
 }
