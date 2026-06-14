@@ -642,3 +642,24 @@ sys_munmap(void)
 
   return 0;
 }
+
+uint64
+sys_mkdirat(void)
+{
+  char path[FAT32_MAX_PATH];
+  int dirfd, mode;
+  struct dirent *ep;
+
+  // mkdirat 参数顺序: dirfd(0), path(1), mode(2)
+  if(argint(0, &dirfd) < 0 || argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &mode) < 0){
+    return -1;
+  }
+
+  // 复用现有的 FAT32 创建目录逻辑
+  if((ep = create(path, T_DIR, 0)) == 0){
+    return -1;
+  }
+  eunlock(ep);
+  eput(ep);
+  return 0;
+}

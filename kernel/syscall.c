@@ -231,6 +231,7 @@ extern uint64 sys_dup_linux(void);
 extern uint64 sys_dup3(void);
 extern uint64 sys_dev(void);
 extern uint64 sys_readdir(void);
+extern uint64 sys_mkdirat(void);
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -280,7 +281,9 @@ static uint64 (*syscalls[])(void) = {
   [SYS_dev]         sys_dev,
   [SYS_readdir]     sys_readdir,
   [SYS_read_linux]   sys_read,
-  
+  [SYS_mkdirat]     sys_mkdirat,
+  [SYS_chdir_linux] sys_chdir,
+
 };
 
 static char *sysnames[] = {
@@ -331,6 +334,8 @@ static char *sysnames[] = {
   [SYS_dev]         "dev",
   [SYS_readdir]     "readdir",
   [SYS_read_linux]   "read",
+  [SYS_mkdirat]     "mkdirat",
+  [SYS_chdir_linux] "chdir",
 };
 
 void
