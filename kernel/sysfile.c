@@ -765,19 +765,19 @@ sys_unlinkat(void)
 }
 
 uint64 sys_mount(void) {
-  char path[FAT32_MAX_PATH];
   char dev[FAT32_MAX_PATH];
+  char path[FAT32_MAX_PATH];
   char type[32];
   
-  // 按照 mount(const char *special, const char *dir, ...) 的顺序获取参数
-  // 必须获取所有参数，否则用户栈指针偏移会出错
+  // 必须按系统调用定义的参数顺序依次获取
+  // mount(special, dir, fstype, flags, data)
   if(argstr(0, dev, FAT32_MAX_PATH) < 0 || 
      argstr(1, path, FAT32_MAX_PATH) < 0 || 
      argstr(2, type, 32) < 0) {
     return -1;
   }
   
-  // 暂时不实现功能，但返回成功
+  // 暂时返回 0 以绕过 panic，后续在此实现具体挂载逻辑
   return 0; 
 }
 
@@ -785,7 +785,7 @@ uint64 sys_umount2(void) {
   char path[FAT32_MAX_PATH];
   int flags;
   
-  // 按照 umount2(const char *target, int flags) 获取参数
+  // umount2(target, flags)
   if(argstr(0, path, FAT32_MAX_PATH) < 0 || 
      argint(1, &flags) < 0) {
     return -1;
