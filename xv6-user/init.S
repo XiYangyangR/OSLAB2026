@@ -175,15 +175,30 @@ main:
 	.align	3
 .LC30:
 	.string	"getdents"
-	.globl	argv
 	.align	3
 .LC31:
+	.string	"fstat"
+	.align	3
+.LC32:
+	.string	"pipe"
+	.align	3
+.LC33:
+	.string	"unlink"
+	.align	3
+.LC34:
+	.string	"mount"
+	.align	3
+.LC35:
+	.string	"umount"
+	.globl	argv
+	.align	3
+.LC36:
 	.string	"sh"
 	.section	.data.rel.local,"aw"
 	.align	3
 	.set	.LANCHOR0,. + 0
 	.type	test, @object
-	.size	test, 224
+	.size	test, 264
 test:
 	.dword	.LC4
 	.dword	.LC5
@@ -212,11 +227,16 @@ test:
 	.dword	.LC28
 	.dword	.LC29
 	.dword	.LC30
+	.dword	.LC31
+	.dword	.LC32
+	.dword	.LC33
+	.dword	.LC34
+	.dword	.LC35
 	.dword	0
 	.type	argv, @object
 	.size	argv, 16
 argv:
-	.dword	.LC31
+	.dword	.LC36
 	.dword	0
 	.ident	"GCC: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0"
 	.section	.note.GNU-stack,"",@progbits
