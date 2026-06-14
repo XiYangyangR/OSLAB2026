@@ -49,5 +49,6 @@
 #define SYS_dup3        24
 #define SYS_mkdirat      34
 #define SYS_chdir_linux 49
+#define SYS_getdents64  61
 
 #endif

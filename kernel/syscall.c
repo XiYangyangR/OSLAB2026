@@ -232,7 +232,7 @@ extern uint64 sys_dup3(void);
 extern uint64 sys_dev(void);
 extern uint64 sys_readdir(void);
 extern uint64 sys_mkdirat(void);
-
+extern uint64 sys_getdents64(void);
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
   [SYS_exit]        sys_exit,
@@ -283,7 +283,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_read_linux]   sys_read,
   [SYS_mkdirat]     sys_mkdirat,
   [SYS_chdir_linux] sys_chdir,
-
+  [SYS_getdents64]  sys_getdents64,
 };
 
 static char *sysnames[] = {
@@ -336,6 +336,7 @@ static char *sysnames[] = {
   [SYS_read_linux]   "read",
   [SYS_mkdirat]     "mkdirat",
   [SYS_chdir_linux] "chdir",
+  [SYS_getdents64]  "getdents64",
 };
 
 void
