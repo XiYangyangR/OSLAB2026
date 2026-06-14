@@ -34,6 +34,8 @@ int trace(int mask);
 int sysinfo(struct sysinfo *);
 int rename(char *old, char *new);
 void shutdown(void);
+int mount(const char *source, const char *target, const char *filesystemtype, unsigned long flags, const void *data);
+int umount2(const char *target, int flags);
 
 // ulib.c
 int stat(const char*, struct stat*);
