@@ -168,7 +168,7 @@ main:
 	.string	"read"
 	.align	3
 .LC28:
-	.string	"mkdirat"
+	.string	"mkdir_"
 	.align	3
 .LC29:
 	.string	"chdir"

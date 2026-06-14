@@ -8,7 +8,7 @@
 
 char *argv[] = { "sh", 0 };
 char *test[]={"getcwd", "write", "getpid", "times", "uname","getppid","yield","gettimeofday","sleep","fork","clone","wait","waitpid","execve","exit","brk","mmap","munmap",
-              "dup","dup2","open","openat","close","read","mkdirat","chdir",0};
+              "dup","dup2","open","openat","close","read","mkdir_","chdir",0};
 
 int
 main(void)
