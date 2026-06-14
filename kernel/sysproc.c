@@ -364,3 +364,46 @@ sys_brk(void)
 
   return p->sz; // 返回新的堆顶地址
 }
+
+
+// 设置当前进程的时间片 (RR 调度算法使用)
+uint64
+sys_set_timeslice(void)
+{
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+    
+  struct proc *p = myproc();
+  acquire(&p->lock);
+  p->timeslice = n;
+  p->timeslice_left = n; // 重新设定时间片时，立刻充满剩余时间
+  release(&p->lock);
+  
+  return 0;
+}
+
+// 设置当前进程的优先级 (Priority & MLFQ 调度算法使用)
+uint64
+sys_set_priority(void)
+{
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+    
+  struct proc *p = myproc();
+  acquire(&p->lock);
+  p->priority = n;
+  release(&p->lock);
+  
+  return 0;
+}
+
+// 获取当前进程的优先级 (MLFQ 调度算法验证使用)
+uint64
+sys_get_priority(void)
+{
+  struct proc *p = myproc();
+  // 读取优先级不需要强制加锁，但为了严谨可以加
+  return p->priority;
+}

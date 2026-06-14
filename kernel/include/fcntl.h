@@ -4,3 +4,6 @@
 #define O_APPEND  0x004
 #define O_CREATE  0x200
 #define O_TRUNC   0x400
+
+#define O_DIRECTORY 0x010000  // 要求打开的是一个目录
+#define AT_FDCWD    -100      // 表示相对路径基于当前工作目录

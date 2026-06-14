@@ -168,6 +168,14 @@ found:
     p->vmas[i].valid= 0;
   }
   p->mmap_next =0x60000000;
+
+  //=====Part4=====
+  p->timeslice = 1;             // 默认时间片为 1
+  p->timeslice_left = 1;        // 默认剩余时间片为 1
+  p->priority = 5;              // 默认中等优先级 (比如 5)
+  p->cpu_ticks = 0;             // 初始运行时间为 0
+  p->sleep_ticks = 0;           // 初始睡眠时间为 0
+
   return p;
 }
 

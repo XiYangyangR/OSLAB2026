@@ -73,6 +73,37 @@ sys_dup(void)
 }
 
 uint64
+sys_dup3(void)
+{
+  struct file *f;
+  int oldfd, newfd, flags;
+  struct proc *p = myproc();
+
+  if(argfd(0, &oldfd, &f) < 0 || argint(1, &newfd) < 0 || argint(2, &flags) < 0)
+    return -1;
+
+  // 越界检查（现在 NOFILE 变成 128 了，100 可以顺利通过）
+  if(newfd < 0 || newfd >= NOFILE)
+    return -1;
+
+  // 兼容 dup2 语义：如果 oldfd 和 newfd 相等，什么都不做，直接返回 newfd
+  if(oldfd == newfd)
+    return newfd;
+
+  // 如果 newfd 已经被占用，需要先关闭它
+  if(p->ofile[newfd] != 0){
+    fileclose(p->ofile[newfd]);
+  }
+
+  // 复制文件指针并增加引用计数
+  p->ofile[newfd] = f;
+  filedup(f);
+  
+  return newfd;
+}
+
+
+uint64
 sys_read(void)
 {
   struct file *f;

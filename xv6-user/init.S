@@ -148,15 +148,33 @@ main:
 	.align	3
 .LC21:
 	.string	"munmap"
-	.globl	argv
 	.align	3
 .LC22:
+	.string	"dup"
+	.align	3
+.LC23:
+	.string	"dup2"
+	.align	3
+.LC24:
+	.string	"open"
+	.align	3
+.LC25:
+	.string	"openat"
+	.align	3
+.LC26:
+	.string	"close"
+	.align	3
+.LC27:
+	.string	"read"
+	.globl	argv
+	.align	3
+.LC28:
 	.string	"sh"
 	.section	.data.rel.local,"aw"
 	.align	3
 	.set	.LANCHOR0,. + 0
 	.type	test, @object
-	.size	test, 152
+	.size	test, 200
 test:
 	.dword	.LC4
 	.dword	.LC5
@@ -176,11 +194,17 @@ test:
 	.dword	.LC19
 	.dword	.LC20
 	.dword	.LC21
+	.dword	.LC22
+	.dword	.LC23
+	.dword	.LC24
+	.dword	.LC25
+	.dword	.LC26
+	.dword	.LC27
 	.dword	0
 	.type	argv, @object
 	.size	argv, 16
 argv:
-	.dword	.LC22
+	.dword	.LC28
 	.dword	0
 	.ident	"GCC: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0"
 	.section	.note.GNU-stack,"",@progbits

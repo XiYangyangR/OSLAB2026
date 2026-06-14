@@ -78,6 +78,13 @@ struct proc {
   int tmask;                    // trace mask
   struct vma vmas[NVMA];        // Virtual memory areas
   uint64 mmap_next;             // Next available address for mmap
+
+  //========for Part4========
+  int timeslice;                // 分配到的初始时间片大小
+  int timeslice_left;           // 当前轮次剩余的时间片
+  int priority;                 // 进程优先级 (数值越小优先级越高)
+  int cpu_ticks;                // 占用 CPU 运行的时钟滴答数 (MLFQ使用)
+  int sleep_ticks;              // 处于睡眠(I/O)的时钟滴答数 (MLFQ使用)
 };
 
 void            reg_info(void);

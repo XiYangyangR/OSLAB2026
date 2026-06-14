@@ -227,6 +227,11 @@ extern uint64 sys_brk(void);
 extern uint64 sys_mmap(void);
 extern uint64 sys_munmap(void);
 extern uint64 sys_openat(void);
+extern uint64 sys_dup_linux(void);
+extern uint64 sys_dup3(void);
+extern uint64 sys_dev(void);
+extern uint64 sys_readdir(void);
+
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
   [SYS_exit]        sys_exit,
@@ -270,6 +275,12 @@ static uint64 (*syscalls[])(void) = {
   [SYS_openat]     sys_openat,
   [SYS_fstat_linux] sys_fstat_linux,
   [SYS_close_linux] sys_close,
+  [SYS_dup_linux]   sys_dup,
+  [SYS_dup3]        sys_dup3,
+  [SYS_dev]         sys_dev,
+  [SYS_readdir]     sys_readdir,
+  [SYS_read_linux]   sys_read,
+  
 };
 
 static char *sysnames[] = {
@@ -313,8 +324,13 @@ static char *sysnames[] = {
   [SYS_mmap]       "mmap",
   [SYS_munmap]     "munmap",
   [SYS_openat]     "openat",
-  [SYS_fstat_linux] "fstat_linux",
-  [SYS_close_linux] "close_linux",
+  [SYS_fstat_linux] "fstat",
+  [SYS_close_linux] "close",
+  [SYS_dup_linux]   "dup",
+  [SYS_dup3]        "dup3",
+  [SYS_dev]         "dev",
+  [SYS_readdir]     "readdir",
+  [SYS_read_linux]   "read",
 };
 
 void
